@@ -17,13 +17,13 @@ isAcceptingLang (Singleton _) = False
 isAcceptingLang Eps           = True
 isAcceptingLang (Rep _)       = True
 isAcceptingLang (Alt l1 l2)   = isAcceptingLang l1 || isAcceptingLang l2
-isAcceptingLang (Cat l1 l2)  = isAcceptingLang l1 && isAcceptingLang l2
+isAcceptingLang (Cat l1 l2)   = isAcceptingLang l1 && isAcceptingLang l2
 
 derive :: Char -> Language -> Language
 derive _ Empty         = Empty
 derive _ Eps           = Empty
 derive c (Singleton d) = if c == d then Eps else Empty
-derive c (Cat l1 l2)  =
+derive c (Cat l1 l2)   =
   if isAcceptingLang l1 then Alt (Cat  (derive c l1) l2) (derive c l2)
   else Cat (derive c l1) l2
 derive c (Alt l1 l2)   = Alt (derive c l1) (derive c l2)
@@ -40,8 +40,8 @@ strToLanguage p = case splitOn "|" p of
   xs  -> disjunct $ map strToLanguage xs
   where
     toSingletonList = map Singleton
-    conjunct = (foldr Cat Eps)
-    disjunct = (foldr Alt Empty)
+    conjunct = foldr Cat Eps
+    disjunct = foldr Alt Empty
 
 match :: String -> String -> Bool
-match p s = matchLanguage (strToLanguage p) s
+match p = matchLanguage (strToLanguage p)

@@ -46,7 +46,7 @@ regularExpression = disjunct <$> (concatenation `sepBy1` char '|')
 strToLanguage :: String -> Language
 strToLanguage p = case parse regularExpression "" p of
   (Right l) -> l
-  _         -> undefined
+  _         -> error "Impossible: There is no unacceptable regular expression"
 
 match :: String -> String -> Bool
 match p = matchLanguage (strToLanguage p)

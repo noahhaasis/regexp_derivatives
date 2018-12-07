@@ -53,3 +53,6 @@ main = hspec $ do
 
     it "pattern \"dog|cat\" doesn't match \"ape\"" $ do
       match "dog|cat" "ape" `shouldBe` False
+
+    -- it "pattern \"dog\|cat\" should match \"dog|cat\"" $ do
+    --   match "dog\|cat" "dog|cat" `shouldBe` True

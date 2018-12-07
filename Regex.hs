@@ -1,5 +1,6 @@
 module Regex (Language (..), match, matchLanguage) where
 
+import Text.ParserCombinators.Parsec
 import Data.List.Split
 
 data Language
@@ -33,15 +34,19 @@ matchLanguage :: Language -> String -> Bool
 matchLanguage l ""     =  isAcceptingLang l
 matchLanguage l (x:xs) = matchLanguage (derive x l) xs
 
+concatenation :: Parser Language
+concatenation = conjunct . toSingletonList <$> many (noneOf ['|'])
+  where conjunct = foldr Cat Eps
+        toSingletonList = map Singleton
+
+regularExpression :: Parser Language
+regularExpression = disjunct <$> (concatenation `sepBy1` char '|')
+  where disjunct = foldr Alt Empty
 
 strToLanguage :: String -> Language
-strToLanguage p = case splitOn "|" p of
-  [x] -> conjunct $ toSingletonList p
-  xs  -> disjunct $ map strToLanguage xs
-  where
-    toSingletonList = map Singleton
-    conjunct = foldr Cat Eps
-    disjunct = foldr Alt Empty
+strToLanguage p = case parse regularExpression "" p of
+  (Right l) -> l
+  _         -> undefined
 
 match :: String -> String -> Bool
 match p = matchLanguage (strToLanguage p)

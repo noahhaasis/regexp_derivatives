@@ -5,6 +5,7 @@ import Data.List.Split
 
 import Debug.Trace
 
+{-======================== DSL =========================-}
 data Language
   = Singleton Char
   | Alt Language Language
@@ -32,6 +33,11 @@ derive c (Cat l1 l2)   =
 derive c (Alt l1 l2)   = Alt (derive c l1) (derive c l2)
 derive c (Rep l)       = Cat (derive c l) (Rep l)
 
+matchLanguage :: Language -> String -> Bool
+matchLanguage l ""     =  isAcceptingLang l
+matchLanguage l (x:xs) = matchLanguage (derive x l) xs
+
+{-======================= Parser =======================-}
 {- Grammar:
 
 DISJUNCTION  -> EXPR1 {'|' EXPR1}
@@ -47,11 +53,6 @@ TODO: Handle escaped characters
 
 -}
 
-matchLanguage :: Language -> String -> Bool
-matchLanguage l ""     =  isAcceptingLang l
-matchLanguage l (x:xs) = matchLanguage (derive x l) xs
-
-{-======================= Parser =======================-}
 singleton :: Parser Language
 singleton = Singleton <$> noneOf ['|']
 
@@ -73,6 +74,8 @@ strToLanguage :: String -> Language
 strToLanguage p = case parse regularExpression "" p of
   (Right l) -> l
   _         -> error "Impossible: There is no unacceptable regular expression"
+
+{-======================================================-}
 
 match :: String -> String -> Bool
 match p = matchLanguage (strToLanguage p)

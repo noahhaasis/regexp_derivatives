@@ -3,8 +3,6 @@ module Regex (Language (..), match, matchLanguage) where
 import Text.ParserCombinators.Parsec
 import Data.List.Split
 
-import Debug.Trace
-
 {-======================== DSL =========================-}
 data Language
   = Singleton Char

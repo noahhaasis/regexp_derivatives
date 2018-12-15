@@ -3,6 +3,8 @@ module Regex (Language (..), match, matchLanguage) where
 import Text.ParserCombinators.Parsec
 import Data.List.Split
 
+import Debug.Trace
+
 data Language
   = Singleton Char
   | Alt Language Language
@@ -30,14 +32,38 @@ derive c (Cat l1 l2)   =
 derive c (Alt l1 l2)   = Alt (derive c l1) (derive c l2)
 derive c (Rep l)       = Cat (derive c l) (Rep l)
 
+{- Grammar:
+
+DISJUNCTION  -> EXPR1 {'|' EXPR1}
+EXPR1        -> EXPR2 EXPR1 | ε
+EXPR2        -> REP | EXPR3
+REP          -> EXPR3 '*'
+EXPR3        -> RANGE | DOT | SINGLETON | '(' EXPR ')'
+DOT          -> '.'
+RANGE        -> '[' {SINGLETON} ']'
+SINGLETON    -> 'a' | 'b' | 'c' | 'd' ...
+
+TODO: Handle escaped characters
+
+-}
+
 matchLanguage :: Language -> String -> Bool
 matchLanguage l ""     =  isAcceptingLang l
 matchLanguage l (x:xs) = matchLanguage (derive x l) xs
 
+{-======================= Parser =======================-}
+singleton :: Parser Language
+singleton = Singleton <$> noneOf ['|']
+
+repr :: Parser Language
+repr = Rep <$> singleton <* char '*'
+
+repOrSingleton :: Parser Language
+repOrSingleton = try repr <|> singleton
+
 concatenation :: Parser Language
-concatenation = conjunct . toSingletonList <$> many (noneOf ['|'])
+concatenation = conjunct <$> many repOrSingleton
   where conjunct = foldr Cat Eps
-        toSingletonList = map Singleton
 
 regularExpression :: Parser Language
 regularExpression = disjunct <$> (concatenation `sepBy1` char '|')

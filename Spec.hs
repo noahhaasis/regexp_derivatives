@@ -54,5 +54,17 @@ main = hspec $ do
     it "pattern \"dog|cat\" doesn't match \"ape\"" $ do
       match "dog|cat" "ape" `shouldBe` False
 
+    it "pattern \"d*\" matches \"dddddd\"" $ do
+      match "d*" "dddddd" `shouldBe` True
+
+    it "pattern \"Hello*\" matches \"Helloooo\"" $ do
+      match "Hello*" "Helloooo" `shouldBe` True
+
+    it "pattern \"Hello*\" matches \"Hell\"" $ do
+      match "Hello*" "Hell" `shouldBe` True
+
+    it "pattern \"Hello*\" doesn't match \"Hello*\"" $ do
+      match "Hello*" "Hello*" `shouldBe` False
+
     -- it "pattern \"dog\|cat\" should match \"dog|cat\"" $ do
     --   match "dog\|cat" "dog|cat" `shouldBe` True
